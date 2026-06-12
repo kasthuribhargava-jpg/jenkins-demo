@@ -3,63 +3,39 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                echo 'Code pulled from GitHub successfully'
-            }
-        }
-
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
                 sh '''
-                echo "===== BUILD STAGE ====="
-                pwd
-                ls -la
+                docker build -t flask-app:v1 .
                 '''
             }
         }
 
-        stage('Test') {
+        stage('Remove Old Container') {
             steps {
                 sh '''
-                echo "===== TEST STAGE ====="
-                echo "Running application tests..."
+                docker rm -f flask-app || true
                 '''
             }
         }
 
-        stage('Package') {
+        stage('Run Container') {
             steps {
                 sh '''
-                echo "===== PACKAGE STAGE ====="
-                mkdir -p artifact
-                echo "Build Successful" > artifact/build.txt
+                docker run -d \
+                  --name flask-app \
+                  -p 5001:5000 \
+                  flask-app:v1
                 '''
             }
         }
 
-        stage('Deploy') {
+        stage('Verify') {
             steps {
                 sh '''
-                echo "===== DEPLOY STAGE ====="
-                echo "Application deployed successfully"
+                docker ps
                 '''
             }
-        }
-    }
-
-    post {
-        success {
-            archiveArtifacts artifacts: 'artifact/*'
-            echo 'Pipeline completed successfully'
-        }
-
-        failure {
-            echo 'Pipeline failed'
-        }
-
-        always {
-            echo 'Pipeline execution finished'
         }
     }
 }
