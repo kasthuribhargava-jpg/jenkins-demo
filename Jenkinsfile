@@ -2,11 +2,27 @@ pipeline {
     agent any
 
     stages {
-        stage('Who Am I') {
+
+        stage('Build Docker Image') {
             steps {
-                sh 'whoami'
-                sh 'id'
-                sh 'docker --version'
+                sh 'docker build -t flask-app:v1 .'
+            }
+        }
+
+        stage('Remove Old Container') {
+            steps {
+                sh 'docker rm -f flask-container || true'
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh 'docker run -d --name flask-container -p 5001:5000 flask-app:v1'
+            }
+        }
+
+        stage('Verify') {
+            steps {
                 sh 'docker ps'
             }
         }
