@@ -2,8 +2,10 @@ pipeline {
     agent any
 
     stages {
-        stage('Docker Test') {
+        stage('Who Am I') {
             steps {
+                sh 'whoami'
+                sh 'id'
                 sh 'docker --version'
                 sh 'docker ps'
             }
